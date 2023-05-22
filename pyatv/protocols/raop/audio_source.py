@@ -87,6 +87,22 @@ class ReaderWrapper(miniaudio.StreamableSource):
         self.reader.seek(offset, whence)
         return True
 
+class StreamReaderWrapper(miniaudio.StreamableSource):
+    """Wraps a reader into a StreamableSource that miniaudio can consume."""
+
+    def __init__(self, reader: asyncio.streams.StreamReader) -> None:
+        """Initialize a new ReaderWrapper instance."""
+        self.reader: asyncio.streams.StreamReader = reader
+        self.loop = asyncio.get_event_loop()
+
+    def read(self, num_bytes: int) -> Union[bytes, memoryview]:
+        """Read and return data from buffer."""
+        return asyncio.run_coroutine_threadsafe(self.reader.read(num_bytes), self.loop).result()
+
+    def seek(self, offset: int, origin: miniaudio.SeekOrigin) -> bool:
+        """Seek in stream."""
+        return False
+
 
 class BufferedReaderSource(AudioSource):
     """Audio source used to play a file from a buffer.
@@ -129,7 +145,7 @@ class BufferedReaderSource(AudioSource):
         sample_size: int,
     ) -> "BufferedReaderSource":
         """Return a new AudioSource instance playing from the provided buffer."""
-        wrapper = ReaderWrapper(buffered_reader)
+        wrapper = StreamReaderWrapper(buffered_reader)
         loop = asyncio.get_event_loop()
         src = await loop.run_in_executor(
             None,
