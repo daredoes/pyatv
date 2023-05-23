@@ -331,7 +331,7 @@ class RaopStream(Stream):
         self.audio = audio
         self.playback_manager = playback_manager
 
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], _metadata: Metadata = None, **kwargs) -> None:
         """Stream local or remote file to device.
 
         Supports either local file paths or a HTTP(s) address.
@@ -352,7 +352,7 @@ class RaopStream(Stream):
             await client.initialize(self.core.service.properties)
 
             # Try to load metadata and pass it along if it succeeds
-            metadata: AudioMetadata = EMPTY_METADATA
+            metadata: AudioMetadata = EMPTY_METADATA if _metadata is None else _metadata
             try:
                 # Source must support seeking to read metadata (or point to file)
                 if (isinstance(file, io.BufferedReader) and file.seekable()) or (
