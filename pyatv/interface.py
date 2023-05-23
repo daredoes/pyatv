@@ -39,6 +39,7 @@ from pyatv.const import (
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
+from pyatv.support.metadata import AudioMetadata
 
 __pdoc__ = {
     "feature": False,
@@ -823,7 +824,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         raise exceptions.NotSupportedError()
 
     @feature(44, "StreamFile", "Stream local file to device.")
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], _metadata: AudioMetadata = None, **kwargs) -> None:
         """Stream local or remote file to device.
 
         Supports either local file paths or a HTTP(s) address.
